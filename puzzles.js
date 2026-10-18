@@ -1,3 +1,4 @@
+import {decoderMarkup,mountDecoder} from './decoder.js';
 import {invitationMarkup,mountInvitation} from './invitation.js?v=20261018-candle';
 import {melodyMarkup,mountMelody} from './melody.js';
 const escapeHTML=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -37,12 +38,13 @@ export function puzzleMarkup(chapter){const p=chapter.puzzle;if(!p)return '';
  if(p.type==='constellation')return `<div class="star-letter"><div class="star-parchment"><p class="eyebrow">ТРИ ПЕЧАТИ · ОДНО НАСТОЯЩЕЕ НЕБО</p><div class="star-signatures">${p.signatures.map(s=>`<div><div class="wax-imprint" role="img" aria-label="${escapeHTML(s.description)}">${starShape(s.sign,true)}</div><span>${escapeHTML(s.name)}</span></div>`).join('')}</div><p class="star-verse">${escapeHTML(p.orderClue)}</p><div class="star-divider">✧</div><p class="star-quote">${escapeHTML(p.mirrorClue)}</p></div><div class="star-sky"><svg class="star-thread" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline id="star-thread-line" points=""/></svg>${p.groups.map((g,i)=>`<button data-star="${g.id}" class="star-group star-group-${i}" aria-label="${escapeHTML(g.label)}">${starShape(g.id)}<span class="star-order"></span></button>`).join('')}</div><p id="star-progress" class="puzzle-feedback" role="status"></p><button id="star-reset" class="text-button" type="button">Начать цепочку заново</button></div>`;
  if(p.type==='melody')return melodyMarkup(p);
  if(p.type==='map')return `<div class="map-restoration"><div class="restoration-heading"><span>N ↑</span><span>ЛИСТ ИЗ КНИГИ ДОРОГ</span></div><div id="tile-board" class="tile-board" aria-label="Девять фрагментов карты"></div><p class="tile-instruction">Коснись одного фрагмента, затем другого, чтобы поменять их местами. Перетаскивать не нужно.</p><p id="tile-status" class="puzzle-feedback" role="status"></p><button id="tile-reset" class="text-button" type="button">Вернуть исходные фрагменты</button><p class="tile-credit">Геометрия © OpenStreetMap contributors · ODbL</p></div>`;
- if(p.type==='cipher')return `<div class="cipher-message"><p class="eyebrow">РУНЫ ГНОМОВ · ТАЙНОЕ ПОСЛАНИЕ</p>${encodeMarkup(p.message)}<p class="cipher-instruction">У спутника есть ключ. У тебя — послание. Опишите друг другу знаки и прочтите его вместе. Ё записана как Е.</p></div>`;
+ if(p.type==='cipher')return decoderMarkup(p,alphabet,rune);
  return '';
 }
 export function mountPuzzle(chapter,progress,save,onSolve){const p=chapter.puzzle;if(!p)return;
  if(p.type==='invitation')return mountInvitation(p,progress,save,onSolve);
  if(p.type==='melody')return mountMelody(p,progress,save,onSolve);
+ if(p.type==='cipher')return mountDecoder(p,progress,save,onSolve,alphabet,rune);
  if(p.type==='constellation'){
   let selected=progress.revision===p.revision&&Array.isArray(progress.stars)&&new Set(progress.stars).size===progress.stars.length&&progress.stars.every(id=>p.groups.some(g=>g.id===id))&&progress.stars.length<p.sequence.length?[...progress.stars]:[];progress.revision=p.revision;
   const feedback=document.querySelector('#star-progress');
