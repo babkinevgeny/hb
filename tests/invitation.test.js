@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+import {invitationMarkup,warmedLines} from '../invitation.js';import {finaleMarkup} from '../finale.js';
+const p=JSON.parse(readFileSync(new URL('../quest.json',import.meta.url))).chapters.at(-1).puzzle;
+test('fire invitation keeps the obvious clue last and text in configuration',()=>{assert.equal(p.verse.length,4);assert.equal(p.verse.at(-1),'Там, где яблочный напиток льётся с высоты.');const html=invitationMarkup(p);assert.equal((html.match(/data-line=/g)||[]).length,4);assert.match(html,/letter-lantern/);assert.match(html,/light-line/);assert.doesNotMatch(html,/Tierra Astur|Gascona/)});
+test('only valid revealed line counts restore',()=>{for(const v of [-1,1.5,'3',null,5])assert.equal(warmedLines(v,4),0);for(let v=0;v<=4;v++)assert.equal(warmedLines(v,4),v)});
+test('final rings compose a house and heart with three non-overlapping radial layers',()=>{const html=finaleMarkup();for(const id of ['home-core','home-middle','home-outer','home-heart','home-roof','home-path'])assert.ok(html.includes(id));assert.equal((html.match(/<use href="#home-picture"/g)||[]).length,3);assert.match(html,/ваше место силы/)});
