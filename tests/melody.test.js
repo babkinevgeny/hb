@@ -24,3 +24,17 @@ test('eight fixed leaves include two semitones and replay controls without desti
  assert.ok(p.slowTempoMs>p.tempoMs);
  const html=melodyMarkup(p);assert.equal((html.match(/data-note=/g)||[]).length,8);assert.equal((html.match(/data-seal=/g)||[]).length,3);assert.match(html,/melody-slow/);assert.match(html,/melody-sound/);assert.doesNotMatch(html,/Campoamor|Viticulture|настольн/i);
 });
+
+test('mobile audio unlocks on each gesture, resumes interruptions and remounts',async()=>{
+ const {createMelodyAudio}=await import('../melody.js');let created=0,unlocks=0,resumes=0,closed=0;
+ class Audio{constructor(){created++;this.state='suspended';this.sampleRate=44100;this.destination={}}createBuffer(){return {}}createBufferSource(){return {connect(){},start(){unlocks++},disconnect(){}}}async resume(){resumes++;this.state='running'}async suspend(){this.state='suspended'}async close(){closed++;this.state='closed'}}
+ const env={webkitAudioContext:Audio,navigator:{audioSession:{type:'auto'}}},engine=createMelodyAudio(env);
+ const first=await engine.ready();assert.equal(first.state,'running');assert.equal(env.navigator.audioSession.type,'playback');first.state='interrupted';assert.equal(await engine.ready(),first);assert.equal(resumes,2);assert.equal(unlocks,2);assert.equal(created,1);
+ engine.close();assert.equal(closed,1);assert.equal(await engine.ready(),null);
+ const remount=createMelodyAudio(env);assert.ok(await remount.ready());assert.equal(created,2);remount.close();
+});
+test('unsupported or denied mobile audio returns failure instead of a false playing state',async()=>{
+ const {createMelodyAudio}=await import('../melody.js');assert.equal(await createMelodyAudio({}).ready(),null);
+ class Denied{constructor(){this.state='suspended'}createBufferSource(){throw Error('denied')}}
+ assert.equal(await createMelodyAudio({AudioContext:Denied}).ready(),null);
+});
