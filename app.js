@@ -1,4 +1,4 @@
-import {mountMusic} from './music.js';
+import {mountMusic} from './music.js?v=20261018-local-audio';
 import {finaleMarkup,mountFinale} from './finale.js?v=20261018-fire';
 import {accepts,restore,canRevealDestination,visibleStoryChapters} from './core.js';
 import {chapterPosition} from './map.js';
