@@ -1,3 +1,4 @@
+import {mountMusic} from './music.js';
 import {finaleMarkup,mountFinale} from './finale.js?v=20261018-fire';
 import {accepts,restore,canRevealDestination,visibleStoryChapters} from './core.js';
 import {chapterPosition} from './map.js';
@@ -5,6 +6,7 @@ import {puzzleMarkup,mountPuzzle,keyMarkup} from './puzzles.js?v=20261018-fire';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key='hobbit-quest-story-v2';
+const music=mountMusic();
 let puzzleCleanup=()=>{},finaleCleanup=()=>{};
 let config,chapters,state,selected=0,db,urls=[],busy=false,zoom=1,puzzleProgress={};
 try{const raw=JSON.parse(localStorage.getItem('hobbit-interactive-v1'));if(raw&&typeof raw==='object'&&!Array.isArray(raw))puzzleProgress=raw}catch{}
@@ -27,6 +29,7 @@ function renderMap(){
 function render(){
  puzzleCleanup();puzzleCleanup=()=>{};finaleCleanup();finaleCleanup=()=>{};
  const c=chapters[selected],done=state.done.includes(c.id),solved=canRevealDestination(state,c),hint=state.hints[c.id]||0;
+ music.setBlocked(c.puzzle?.type==='melody'&&!solved);
  $('#chapter').classList.toggle('constellation-card',c.puzzle?.type==='constellation'&&!solved);
  $('#progress').textContent=`${state.done.length} / ${chapters.length} глав`;
  renderMap();
