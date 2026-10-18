@@ -2,7 +2,7 @@ import {mountMusic} from './music.js?v=20261018-local-audio';
 import {finaleMarkup,mountFinale} from './finale.js?v=20261018-fire';
 import {accepts,restore,canRevealDestination,visibleStoryChapters} from './core.js';
 import {chapterPosition} from './map.js';
-import {puzzleMarkup,mountPuzzle,keyMarkup} from './puzzles.js?v=20261018-candle';
+import {puzzleMarkup,mountPuzzle,keyMarkup} from './puzzles.js?v=20261018-dwarf';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key='hobbit-quest-story-v2';
