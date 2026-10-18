@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {project,unproject,chapterPosition} from '../map.js';
+const bounds=[-5.854,43.349,-5.837,43.368];
+test('north is up and coordinates round trip',()=>{assert.deepEqual(project([-5.854,43.368],bounds),{x:0,y:0});const p=project([-5.849654,43.364196],bounds);const c=unproject(p.x,p.y,bounds);assert.ok(Math.abs(c[0]+5.849654)<1e-9);assert.ok(Math.abs(c[1]-43.364196)<1e-9)});
+test('private locations are never invented',()=>{assert.equal(chapterPosition({id:'home',privateLocation:true},{},bounds),null);assert.ok(chapterPosition({id:'home',privateLocation:true},{home:{coordinates:[-5.85,43.36]}},bounds));assert.equal(project([0,0],bounds),null)});
+test('public park landmark is replaced by locally set private point',()=>{const c={id:'winter',privateLocation:true,coordinates:[-5.848,43.351]};assert.deepEqual(chapterPosition(c,{},bounds),project(c.coordinates,bounds));assert.deepEqual(chapterPosition(c,{winter:{coordinates:[-5.85,43.355]}},bounds),project([-5.85,43.355],bounds))});
