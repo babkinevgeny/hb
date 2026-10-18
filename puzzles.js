@@ -1,3 +1,5 @@
+import {lockMarkup,mountLock} from './breakfast-lock.js';
+import {leafMarkup,mountLeaf} from './living-leaf.js';
 import {decoderMarkup,mountDecoder} from './decoder.js';
 import {invitationMarkup,mountInvitation} from './invitation.js?v=20261018-candle';
 import {melodyMarkup,mountMelody} from './melody.js';
@@ -34,6 +36,8 @@ export function starGeometry(id,mirror=false){
 }
 export function starShape(id,mirror=false){const {points,edges}=starGeometry(id,mirror);return `<svg viewBox="0 0 100 100" aria-hidden="true">${edges.map(([a,b])=>`<line x1="${points[a][0]}" y1="${points[a][1]}" x2="${points[b][0]}" y2="${points[b][1]}" stroke="currentColor" stroke-width="1" opacity=".8"/>`).join('')}${points.map(([x,y],i)=>`<circle class="star-glow" cx="${x}" cy="${y}" r="${i===0?2.6:2}" fill="currentColor"/>`).join('')}</svg>`}
 export function puzzleMarkup(chapter){const p=chapter.puzzle;if(!p)return '';
+ if(p.type==='letter-lock')return lockMarkup(p);
+ if(p.type==='living-leaf')return leafMarkup();
  if(p.type==='invitation')return invitationMarkup(p);
  if(p.type==='constellation')return `<div class="star-letter"><div class="star-parchment"><p class="eyebrow">ТРИ ПЕЧАТИ · ОДНО НАСТОЯЩЕЕ НЕБО</p><div class="star-signatures">${p.signatures.map(s=>`<div><div class="wax-imprint" role="img" aria-label="${escapeHTML(s.description)}">${starShape(s.sign,true)}</div><span>${escapeHTML(s.name)}</span></div>`).join('')}</div><p class="star-verse">${escapeHTML(p.orderClue)}</p><div class="star-divider">✧</div><p class="star-quote">${escapeHTML(p.mirrorClue)}</p></div><div class="star-sky"><svg class="star-thread" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline id="star-thread-line" points=""/></svg>${p.groups.map((g,i)=>`<button data-star="${g.id}" class="star-group star-group-${i}" aria-label="${escapeHTML(g.label)}">${starShape(g.id)}<span class="star-order"></span></button>`).join('')}</div><p id="star-progress" class="puzzle-feedback" role="status"></p><button id="star-reset" class="text-button" type="button">Начать цепочку заново</button></div>`;
  if(p.type==='melody')return melodyMarkup(p);
@@ -42,6 +46,8 @@ export function puzzleMarkup(chapter){const p=chapter.puzzle;if(!p)return '';
  return '';
 }
 export function mountPuzzle(chapter,progress,save,onSolve){const p=chapter.puzzle;if(!p)return;
+ if(p.type==='letter-lock')return mountLock(p,progress,save,onSolve);
+ if(p.type==='living-leaf')return mountLeaf(p,progress,save,onSolve);
  if(p.type==='invitation')return mountInvitation(p,progress,save,onSolve);
  if(p.type==='melody')return mountMelody(p,progress,save,onSolve);
  if(p.type==='cipher')return mountDecoder(p,progress,save,onSolve,alphabet,rune);
