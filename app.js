@@ -4,6 +4,7 @@ import {puzzleMarkup,mountPuzzle,keyMarkup} from './puzzles.js';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key='hobbit-quest-story-v2';
+let puzzleCleanup=()=>{};
 let config,chapters,state,selected=0,db,urls=[],busy=false,zoom=1,puzzleProgress={};
 try{const raw=JSON.parse(localStorage.getItem('hobbit-interactive-v1'));if(raw&&typeof raw==='object'&&!Array.isArray(raw))puzzleProgress=raw}catch{}
 function savePuzzles(){try{localStorage.setItem('hobbit-interactive-v1',JSON.stringify(puzzleProgress))}catch{toast('Ход испытания не сохранился. Не закрывайте страницу до разгадки.')}}
@@ -23,6 +24,7 @@ function renderMap(){
  $('#map-status').textContent=visible.length===1?'Пока карта знает лишь твой порог. Остальные места проявятся, когда ты прочтёшь печати.':`На карте проявилось мест: ${visible.length}. Неразгаданные печати ещё берегут свои тайны.`;
 }
 function render(){
+ puzzleCleanup();puzzleCleanup=()=>{};
  const c=chapters[selected],done=state.done.includes(c.id),solved=canRevealDestination(state,c),hint=state.hints[c.id]||0;
  $('#chapter').classList.toggle('constellation-card',c.puzzle?.type==='constellation'&&!solved);
  $('#progress').textContent=`${state.done.length} / ${chapters.length} глав`;
@@ -31,7 +33,7 @@ function render(){
  if(!solved){
   if($('#answer-form'))$('#answer-form').onsubmit=e=>{e.preventDefault();if(accepts(c,$('#answer').value))solve(c);else $('#answer-status').textContent='Печать пока молчит. Попробуй иначе — или спроси у странника.'};
   $('#hint').onclick=()=>{state.hints[c.id]=hint+1;save();render()};
-  if(c.puzzle){if(!puzzleProgress[c.id]||typeof puzzleProgress[c.id]!=='object'||Array.isArray(puzzleProgress[c.id]))puzzleProgress[c.id]={};mountPuzzle(c,puzzleProgress[c.id],savePuzzles,()=>solve(c))}
+  if(c.puzzle){if(!puzzleProgress[c.id]||typeof puzzleProgress[c.id]!=='object'||Array.isArray(puzzleProgress[c.id]))puzzleProgress[c.id]={};puzzleCleanup=mountPuzzle(c,puzzleProgress[c.id],savePuzzles,()=>solve(c))||(()=>{})}
  }
  if($('#arrived'))$('#arrived').onclick=()=>complete();
  if($('#copy-order'))$('#copy-order').onclick=async()=>{try{await navigator.clipboard.writeText(c.orderNumber);toast('Номер грамоты скопирован.')}catch{toast('Покажите номер на экране.')}};
