@@ -1,4 +1,4 @@
-import {invitationMarkup,mountInvitation} from './invitation.js';
+import {invitationMarkup,mountInvitation} from './invitation.js?v=20261018-candle';
 import {melodyMarkup,mountMelody} from './melody.js';
 const escapeHTML=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const alphabet='АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
