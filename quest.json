@@ -11,7 +11,7 @@
     {
       "id": "home",
       "title": "Нежданные гости",
-      "place": "Дом",
+      "place": "Дом · Calle Belarmino Cabal, 16",
       "story": "Круглая дверь открывается. Сегодня вы отправляетесь вдвоём: именинница и её верный спутник.",
       "riddle": "Что всегда ждёт нас в конце любого приключения?",
       "answers": [
@@ -23,7 +23,10 @@
       ],
       "reward": "Ключ от круглой двери",
       "enabled": true,
-      "privateLocation": true
+      "coordinates": [
+        -5.8528473,
+        43.372719
+      ]
     },
     {
       "id": "breakfast",
@@ -179,7 +182,7 @@
       -5.854,
       43.349,
       -5.837,
-      43.368
+      43.375
     ],
     "source": "© OpenStreetMap contributors · ODbL",
     "sourceUrl": "https://www.openstreetmap.org/copyright",

@@ -1,5 +1,5 @@
 import {accepts,restore} from './core.js';
-import {chapterPosition,unproject} from './map.js';
+import {chapterPosition,unproject,visibleMapChapters} from './map.js';
 const $=s=>document.querySelector(s), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let config,chapters,state,selected=0,db,urls=[],busy=false;
 const key='hobbit-quest-v1',privateKey='hobbit-private-places-v1';
@@ -13,9 +13,9 @@ function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');se
 function save(){try{localStorage.setItem(key,JSON.stringify(state))}catch{toast('Не удалось сохранить прогресс. Разрешите хранение данных браузера.')}}
 function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open('hobbit-journal',1);r.onupgradeneeded=()=>r.result.createObjectStore('photos',{keyPath:'id'});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
 function store(mode,action){return new Promise((resolve,reject)=>{const tx=db.transaction('photos',mode);const request=action(tx.objectStore('photos'));let result;request.onsuccess=()=>result=request.result;tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
-function render(){const n=state.done.length;$('#progress').textContent=`${n} / ${chapters.length} глав`;const points=chapters.map(position);let pen=false;const path=[];
+function render(){const n=state.done.length;$('#progress').textContent=`${n} / ${chapters.length} глав`;const visible=visibleMapChapters(chapters,n);const points=visible.map(position);let pen=false;const path=[];
 points.forEach(p=>{if(!p){pen=false;return}path.push(`${pen?'L':'M'} ${p.x} ${p.y}`);pen=true});$('#route').setAttribute('d',path.join(' '));
-$('#pins').innerHTML=chapters.map((c,i)=>{const p=points[i];return p?`<button class="pin ${i<n?'done':''} ${i===selected?'selected':''}" style="left:${p.x}%;top:${p.y}%" data-index="${i}" ${i>n?'disabled':''} aria-label="${i>n?'Закрытая глава':esc(c.title)}" aria-pressed="${i===selected}">${i<n?'✓':i>n?'·':i+1}</button>`:''}).join('');
+$('#pins').innerHTML=visible.map((c,i)=>{const p=points[i];return p?`<button class="pin ${i<n?'done':''} ${i===selected?'selected':''}" style="left:${p.x}%;top:${p.y}%" data-index="${i}" ${i>n?'disabled':''} aria-label="${i>n?'Закрытая глава':esc(c.title)}" aria-pressed="${i===selected}">${i<n?'✓':i>n?'·':i+1}</button>`:''}).join('');
 $('#chapter-list').innerHTML=chapters.map(chapterButton).join('');
 for(const container of [$('#pins'),$('#chapter-list')])container.querySelectorAll('button').forEach(b=>b.onclick=e=>{e.stopPropagation();selected=+b.dataset.index;render()});
 

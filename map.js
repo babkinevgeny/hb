@@ -6,3 +6,5 @@ export function project(coordinates,bounds){
 }
 export function unproject(x,y,bounds){const [w,s,e,n]=bounds;return [w+x/100*(e-w),n-y/100*(n-s)]}
 export function chapterPosition(chapter,privatePlaces,bounds){return project(chapter.privateLocation?(privatePlaces[chapter.id]?.coordinates||chapter.coordinates):chapter.coordinates,bounds)}
+
+export function visibleMapChapters(chapters,completedCount){return chapters.slice(0,Math.min(chapters.length,Math.max(0,completedCount)+1))}
