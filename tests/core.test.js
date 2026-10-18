@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {normalize,accepts,restore} from '../core.js';
+const chapters=JSON.parse(readFileSync(new URL('../quest.json',import.meta.url))).chapters.filter(c=>c.enabled);
+test('answers tolerate case, punctuation and ё, but reject unrelated answers',()=>{assert.equal(normalize('  ЁЛКА! '),'елка');assert.ok(accepts(chapters[0],'ДОМ!'));assert.ok(!accepts(chapters[0],'домик'))});
+test('corrupted storage recovers safely',()=>{assert.deepEqual(restore('{oops',chapters),{done:[],hints:{},revealed:false})});
+test('only consecutive chapters can be restored and final stays locked',()=>{const s=restore(JSON.stringify({done:[chapters[0].id,chapters[2].id],revealed:true,hints:{home:999}}),chapters);assert.deepEqual(s.done,[chapters[0].id]);assert.equal(s.revealed,false);assert.equal(s.hints.home,2)});
+test('complete game and reveal survive reload',()=>{assert.ok(restore(JSON.stringify({done:chapters.map(c=>c.id),revealed:true}),chapters).revealed)});
+test('configuration contains unique ids and playable answers',()=>{assert.equal(new Set(chapters.map(c=>c.id)).size,chapters.length);for(const c of chapters){assert.ok(c.hints.length);assert.ok(accepts(c,c.answers[0]));assert.ok(c.x>0&&c.x<100&&c.y>0&&c.y<100)}});
