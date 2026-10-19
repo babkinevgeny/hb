@@ -1,13 +1,14 @@
+import {journeyMarkup,mountJourney} from './journey.js';
 import {mountMusic} from './music.js?v=20261018-local-audio';
 import {finaleMarkup,mountFinale} from './finale.js?v=20261018-fire';
 import {accepts,restore,canRevealDestination,visibleStoryChapters} from './core.js';
-import {chapterPosition,destinationUrl} from './map.js?v=20261019-arrows';
-import {puzzleMarkup,mountPuzzle,keyMarkup} from './puzzles.js?v=20261019-arrows';
+import {chapterPosition,destinationUrl} from './map.js?v=20261019-journey';
+import {puzzleMarkup,mountPuzzle,keyMarkup} from './puzzles.js?v=20261019-journey';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key='hobbit-quest-story-v2';
 const music=mountMusic();
-let puzzleCleanup=()=>{},finaleCleanup=()=>{};
+let puzzleCleanup=()=>{},finaleCleanup=()=>{},journeyCleanup=()=>{};
 let config,chapters,state,selected=0,zoom=1,puzzleProgress={};
 try{const raw=JSON.parse(localStorage.getItem('hobbit-interactive-v1'));if(raw&&typeof raw==='object'&&!Array.isArray(raw))puzzleProgress=raw}catch{}
 function savePuzzles(){try{localStorage.setItem('hobbit-interactive-v1',JSON.stringify(puzzleProgress))}catch{toast('Ход испытания не сохранился. Не закрывайте страницу до разгадки.')}}
@@ -25,7 +26,7 @@ function renderMap(){
  $('#map-status').textContent=visible.length===1?'Пока карта знает лишь твой порог. Остальные места проявятся, когда ты прочтёшь печати.':`На карте проявилось мест: ${visible.length}. Неразгаданные печати ещё берегут свои тайны.`;
 }
 function render(){
- puzzleCleanup();puzzleCleanup=()=>{};finaleCleanup();finaleCleanup=()=>{};
+ puzzleCleanup();puzzleCleanup=()=>{};finaleCleanup();finaleCleanup=()=>{};journeyCleanup();journeyCleanup=()=>{};
  const c=chapters[selected],done=state.done.includes(c.id),solved=canRevealDestination(state,c),hint=state.hints[c.id]||0;
  music.setBlocked(c.puzzle?.type==='melody'&&!solved);
  $('#chapter').classList.toggle('constellation-card',c.puzzle?.type==='constellation'&&!solved);
@@ -42,7 +43,8 @@ function render(){
  if($('#copy-order'))$('#copy-order').onclick=async()=>{try{await navigator.clipboard.writeText(c.orderNumber);toast('Номер грамоты скопирован.')}catch{toast('Покажите номер на экране.')}};
  $('#inventory').innerHTML=state.done.length?chapters.slice(0,state.done.length).map((c,i)=>`<div class="word-fragment"><small>${String(i+1).padStart(2,'0')}</small><span>${esc(c.reward)}</span></div>`).join(''):'<p class="empty">Восемь печатей. Восемь слов. Одно послание, которое ждёт, когда ты его соберёшь.</p>';
  $('#final').hidden=state.done.length!==chapters.length;$('#second-map').hidden=!state.revealed;$('#finale-puzzle').hidden=state.revealed;
- if(state.done.length===chapters.length&&!state.revealed){$('#finale-puzzle').innerHTML=finaleMarkup();puzzleProgress.finale||={};finaleCleanup=mountFinale($('#finale-puzzle'),puzzleProgress.finale,savePuzzles,()=>{state.revealed=true;save();render();$('#second-map').scrollIntoView({behavior:'smooth',block:'center'})})}
+ if(state.done.length===chapters.length&&state.revealed){$('#second-map').innerHTML=journeyMarkup(config.journey);puzzleProgress.journey||={};journeyCleanup=mountJourney($('#second-map'),config.journey,puzzleProgress.journey,savePuzzles)||(()=>{})}else $('#second-map').replaceChildren();
+ if(state.done.length===chapters.length&&!state.revealed){$('#finale-puzzle').innerHTML=finaleMarkup();puzzleProgress.finale||={};finaleCleanup=mountFinale($('#finale-puzzle'),puzzleProgress.finale,savePuzzles,()=>{state.revealed=true;save();render();$('#second-map').scrollIntoView({behavior:'smooth',block:'start'})})}
 }
 function complete(force=false){const c=chapters[state.done.length];if(!c||(!force&&!canRevealDestination(state,c)))return;if(!state.solved.includes(c.id))state.solved.push(c.id);state.done.push(c.id);selected=Math.min(state.done.length,chapters.length-1);save();render();toast('Слово сохранено. Следующее послание ждёт.');if(state.done.length===chapters.length)$('#final').scrollIntoView({behavior:'smooth'});else $('#chapter').scrollIntoView({behavior:'smooth',block:'start'})}
 $('#start').onclick=()=>$('#prologue').scrollIntoView({behavior:'smooth'});
@@ -55,9 +57,9 @@ $('#keeper-alphabet').innerHTML=keyMarkup();
 function setZoom(value){zoom=Math.max(1,Math.min(3,value));$('#map-canvas').style.width=`${zoom*100}%`;$('#zoom-out').disabled=zoom===1;$('#zoom-in').disabled=zoom===3}
 $('#zoom-in').onclick=()=>setZoom(zoom+.5);$('#zoom-out').onclick=()=>setZoom(zoom-.5);setZoom(1);
 try{
- const response=await fetch('./quest.json?v=20261019-arrows');if(!response.ok)throw Error();config=await response.json();chapters=config.chapters.filter(c=>c.enabled);if(!chapters.length)throw Error();let raw;
+ const response=await fetch('./quest.json?v=20261019-journey');if(!response.ok)throw Error();config=await response.json();chapters=config.chapters.filter(c=>c.enabled);if(!chapters.length)throw Error();let raw;
  try{raw=localStorage.getItem(key)}catch{toast('Сохранение недоступно. Не закрывайте страницу во время квеста.')}
  state=restore(raw,chapters);selected=Math.min(state.done.length,chapters.length-1);
  $('#intro').textContent=config.intro;$('#prologue-copy').innerHTML=config.prologue.map(p=>`<p>${esc(p)}</p>`).join('');$('#prologue-signature').textContent=config.prologueSignature;
- $('#destination').textContent=config.journey.destination||'Ещё одна карта. Ещё одна история.';$('#journey-message').textContent=config.journey.message;render();
+ render();
 }catch{$('#chapter').textContent='Письма не удалось прочесть. Обнови страницу, когда появится соединение.';$('#start').disabled=true}
