@@ -1,4 +1,4 @@
-import {weavingMarkup,mountWeaving} from './weaving.js';
+import {weavingMarkup,mountWeaving} from './weaving.js?v=20261019-arrows';
 import {lockMarkup,mountLock} from './breakfast-lock.js';
 import {leafMarkup,mountLeaf} from './living-leaf.js';
 import {decoderMarkup,mountDecoder} from './decoder.js';

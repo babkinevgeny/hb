@@ -1,8 +1,8 @@
 import {mountMusic} from './music.js?v=20261018-local-audio';
 import {finaleMarkup,mountFinale} from './finale.js?v=20261018-fire';
 import {accepts,restore,canRevealDestination,visibleStoryChapters} from './core.js';
-import {chapterPosition,destinationUrl} from './map.js?v=20261019-comfort';
-import {puzzleMarkup,mountPuzzle,keyMarkup} from './puzzles.js?v=20261019-comfort';
+import {chapterPosition,destinationUrl} from './map.js?v=20261019-arrows';
+import {puzzleMarkup,mountPuzzle,keyMarkup} from './puzzles.js?v=20261019-arrows';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const key='hobbit-quest-story-v2';
@@ -55,7 +55,7 @@ $('#keeper-alphabet').innerHTML=keyMarkup();
 function setZoom(value){zoom=Math.max(1,Math.min(3,value));$('#map-canvas').style.width=`${zoom*100}%`;$('#zoom-out').disabled=zoom===1;$('#zoom-in').disabled=zoom===3}
 $('#zoom-in').onclick=()=>setZoom(zoom+.5);$('#zoom-out').onclick=()=>setZoom(zoom-.5);setZoom(1);
 try{
- const response=await fetch('./quest.json?v=20261019-comfort');if(!response.ok)throw Error();config=await response.json();chapters=config.chapters.filter(c=>c.enabled);if(!chapters.length)throw Error();let raw;
+ const response=await fetch('./quest.json?v=20261019-arrows');if(!response.ok)throw Error();config=await response.json();chapters=config.chapters.filter(c=>c.enabled);if(!chapters.length)throw Error();let raw;
  try{raw=localStorage.getItem(key)}catch{toast('Сохранение недоступно. Не закрывайте страницу во время квеста.')}
  state=restore(raw,chapters);selected=Math.min(state.done.length,chapters.length-1);
  $('#intro').textContent=config.intro;$('#prologue-copy').innerHTML=config.prologue.map(p=>`<p>${esc(p)}</p>`).join('');$('#prologue-signature').textContent=config.prologueSignature;
