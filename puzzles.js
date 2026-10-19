@@ -1,3 +1,4 @@
+import {weavingMarkup,mountWeaving} from './weaving.js';
 import {lockMarkup,mountLock} from './breakfast-lock.js';
 import {leafMarkup,mountLeaf} from './living-leaf.js';
 import {decoderMarkup,mountDecoder} from './decoder.js';
@@ -36,6 +37,7 @@ export function starGeometry(id,mirror=false){
 }
 export function starShape(id,mirror=false){const {points,edges}=starGeometry(id,mirror);return `<svg viewBox="0 0 100 100" aria-hidden="true">${edges.map(([a,b])=>`<line x1="${points[a][0]}" y1="${points[a][1]}" x2="${points[b][0]}" y2="${points[b][1]}" stroke="currentColor" stroke-width="1" opacity=".8"/>`).join('')}${points.map(([x,y],i)=>`<circle class="star-glow" cx="${x}" cy="${y}" r="${i===0?2.6:2}" fill="currentColor"/>`).join('')}</svg>`}
 export function puzzleMarkup(chapter){const p=chapter.puzzle;if(!p)return '';
+ if(p.type==='weaving')return weavingMarkup();
  if(p.type==='letter-lock')return lockMarkup(p);
  if(p.type==='living-leaf')return leafMarkup();
  if(p.type==='invitation')return invitationMarkup(p);
@@ -46,6 +48,7 @@ export function puzzleMarkup(chapter){const p=chapter.puzzle;if(!p)return '';
  return '';
 }
 export function mountPuzzle(chapter,progress,save,onSolve){const p=chapter.puzzle;if(!p)return;
+ if(p.type==='weaving')return mountWeaving(p,progress,save,onSolve);
  if(p.type==='letter-lock')return mountLock(p,progress,save,onSolve);
  if(p.type==='living-leaf')return mountLeaf(p,progress,save,onSolve);
  if(p.type==='invitation')return mountInvitation(p,progress,save,onSolve);
